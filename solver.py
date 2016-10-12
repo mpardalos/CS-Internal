@@ -6,10 +6,17 @@ autotranslate(['constraint'])
 import constraint
 
 # periods is an int for how many periods per week are required for this subject
-subject = namedtuple("subject", ['name', 'periods'])
+Subject = namedtuple("subject", ['name', 'periods'])
+
+class Student:
+    def __init__(self, subjects):
+        self.subjects = subjects
+        self.periods = [
+            ['{subject_name}-period{period_num}'.format(subject_name=Subject.name, period_num=period_num) for period_num in range(subject.periods)]
+                for subject in subjects]
 
 
-def solve(subjects: list, max_students_per_class: int, periods_per_week: int):
+def solve(students: list, subjects: list, max_students_per_class: int, periods_per_week: int):
     """
     Create a timetable for the given number of periods, subjects, and students per subject
     
@@ -28,17 +35,21 @@ def solve(subjects: list, max_students_per_class: int, periods_per_week: int):
             problem.addVariable('{subject_name}-period{period_num}'.format(subject_name=subject.name, period_num=period_num),
                                 constraint.Domain(range(1, periods_per_week + 1)))
 
+    # Each student is represented by a constraint that does not allow for his or her subjects to be on the same period
+    for student in students:
+        problem.addConstraint(constraint.AllDifferentConstraint(), student.periods)
 
-
+    # TODO: Crashes because of py2/py3 incompatibility
+    problem.getSolution()
 
 # Test data
 periods_per_week = 20
-HistorySL = subject("HistorySL", 2)
-HistoryHL = subject("HistoryHL", 3)
-MathSL = subject("MathSL", 2)
-MathHL = subject("MathHL", 3)
-BiologySL = subject("BiologySL", 2)
-BiologyHL = subject("BiologyHL", 3)
+HistorySL = Subject("HistorySL", 2)
+HistoryHL = Subject("HistoryHL", 3)
+MathSL = Subject("MathSL", 2)
+MathHL = Subject("MathHL", 3)
+BiologySL = Subject("BiologySL", 2)
+BiologyHL = Subject("BiologyHL", 3)
 
 subjects = [
     HistorySL,
@@ -49,6 +60,13 @@ subjects = [
     BiologyHL
 ]
 
+students = [
+    Student([HistorySL, MathHL]),
+    Student([BiologySL, HistoryHL]),
+    Student([MathSL, BiologyHL]),
+    Student([HistorySL, BiologyHL]),
+]
+
 max_students_per_class = 14
 
-solve(subjects, max_students_per_class, periods_per_week)
+solve(students, subjects, max_students_per_class, periods_per_week)
