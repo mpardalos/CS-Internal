@@ -16,13 +16,16 @@ class Subject:
     def __hash__(self):
         return hash(self.name)
         
-def solve(students: list, periods_per_week: int):
+def possible_timetables(students: list, periods_per_week: int):
     """
-    Create a timetable for the given number of periods, subjects, and students per subject
+    Yield possible timetables
     
     Args:
         students: a list of tuples of Subjects, one for each student, containing that student's Subjects
         periods_per_week: The number of periods in the whole timetable
+
+    Returns:
+        A dict of {period name: the position in the timetable that the period should occupy}
     """
     solver = pywrapcp.Solver("timetable")
 
@@ -58,33 +61,26 @@ def solve(students: list, periods_per_week: int):
     solver.NewSearch(db)
 
     while solver.NextSolution():
-        yield period_variables
-
-    
+        yield {period_name: period_variable.Value() for period_name, period_variable in period_variables.items()}
 
 
-# Test data
-periods_per_week = 20
-HistorySL = Subject("HistorySL", 2)
-HistoryHL = Subject("HistoryHL", 3)
-MathSL = Subject("MathSL", 2)
-MathHL = Subject("MathHL", 3)
-BiologySL = Subject("BiologySL", 2)
-BiologyHL = Subject("BiologyHL", 3)
+if __name__ == '__main__':
+    # Test data
+    periods_per_week = 20
+    HistorySL = Subject("HistorySL", 2)
+    HistoryHL = Subject("HistoryHL", 3)
+    MathSL = Subject("MathSL", 2)
+    MathHL = Subject("MathHL", 3)
+    BiologySL = Subject("BiologySL", 2)
+    BiologyHL = Subject("BiologyHL", 3)
 
-students = [
-    (HistorySL, MathHL),
-    (BiologySL, HistoryHL),
-    (MathSL, BiologyHL),
-    (HistorySL, BiologyHL)
-]
+    students = [
+        (HistorySL, MathHL),
+        (BiologySL, HistoryHL),
+        (MathSL, BiologyHL),
+        (HistorySL, BiologyHL)
+    ]
 
-solutions = solve(students, periods_per_week)
+    solutions = possible_timetables(students, periods_per_week)
 
-pprint.pprint(next(solutions))
-print()
-pprint.pprint(next(solutions))
-print()
-pprint.pprint(next(solutions))
-print()
-
+    pprint.pprint(next(solutions))
