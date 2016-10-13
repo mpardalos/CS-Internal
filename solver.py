@@ -4,46 +4,64 @@ from collections import namedtuple
 import itertools
 from ortools.constraint_solver import pywrapcp
 
-# periods is an int for how many periods per week are required for this subject
-Subject = namedtuple("subject", ['name', 'periods'])
+class Subject:
+    def __init__(self, name: str, periods_per_week: int):
+        self.name = name
+        self.periods_per_week = periods_per_week
+        self.period_names = ['{}-p{}'.format(name, i) for i in range(1, periods_per_week+1)]
+        
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and self.name == other.name
 
-class Student:
-    def __init__(self, subjects):
-        self.subjects = subjects
-        self.periods = list(itertools.chain(*[
-            ['{}-p{}'.format(subject.name, period_num)
-                for period_num in range(1, subject.periods+1)]
-                for subject in subjects]))
-
-
-def solve(students: list, subjects: list, max_students_per_class: int, periods_per_week: int):
+    def __hash__(self):
+        return hash(self.name)
+        
+def solve(students: list, periods_per_week: int):
     """
     Create a timetable for the given number of periods, subjects, and students per subject
     
     Args:
-        periods_per_week (int): The number of periods in the whole timetable
-        subjects ([str]): The subjects that should appear on the timetable
-        max_students_per_class (int): The number of students per class
+        students: a list of tuples of Subjects, one for each student, containing that student's Subjects
+        periods_per_week: The number of periods in the whole timetable
     """
     solver = pywrapcp.Solver("timetable")
 
-    periods = {
-        '{}-p{}'.format(subject.name, i): solver.IntVar(1, periods_per_week, '{}-p{}'.format(subject.name, i))
-        for subject in subjects
-        for i in range(1, subject.periods+1)
-    }
+    # Flatten the list that contains each student's subjects and remove duplicates
+    subjects = set(itertools.chain(*students))
+
+    # Get the list of all the periods for all subjects
+    period_names = itertools.chain(*[subject.period_names for subject in subjects])
+
+    # Generate a dict of period_name:period_variable
+    # We need a dict to be able to access each period's variable by name
+    period_variables = {period_name: solver.IntVar(1, periods_per_week+1, period_name) 
+                            for period_name in period_names}
 
     for student in students:
-        student_periods = [periods[period_name] for period_name in student.periods]
-        solver.AddConstraint(solver.AllDifferent(student_periods))
+        # Get the list of all the periods for the student's subjects
+        student_period_names = list(itertools.chain(*[subject.period_names for subject in student]))
+        
+        # Filter the list of all periods to get only those that the student is a part of
+        student_period_variables = [
+            period_var 
+            for period_name, period_var in period_variables.items() 
+            if period_name in student_period_names
+        ]
 
-    db = solver.Phase(list(periods.values()),
+        # All of the student's periods must be scheduled at different times
+        solver.AddConstraint(solver.AllDifferent(student_period_variables))
+
+
+    db = solver.Phase(list(period_variables.values()),
                       solver.CHOOSE_MIN_SIZE_LOWEST_MAX,
                       solver.ASSIGN_CENTER_VALUE)
     solver.NewSearch(db)
-    solver.NextSolution()
 
-    pprint.pprint(periods)
+    while solver.NextSolution():
+        yield period_variables
+
+    
+
 
 # Test data
 periods_per_week = 20
@@ -54,22 +72,19 @@ MathHL = Subject("MathHL", 3)
 BiologySL = Subject("BiologySL", 2)
 BiologyHL = Subject("BiologyHL", 3)
 
-subjects = [
-    HistorySL,
-    HistoryHL,
-    MathSL,
-    MathHL,
-    BiologySL,
-    BiologyHL
-]
-
 students = [
-    Student([HistorySL, MathHL]),
-    Student([BiologySL, HistoryHL]),
-    Student([MathSL, BiologyHL]),
-    Student([HistorySL, BiologyHL]),
+    (HistorySL, MathHL),
+    (BiologySL, HistoryHL),
+    (MathSL, BiologyHL),
+    (HistorySL, BiologyHL)
 ]
 
-max_students_per_class = 14
+solutions = solve(students, periods_per_week)
 
-solve(students, subjects, max_students_per_class, periods_per_week)
+pprint.pprint(next(solutions))
+print()
+pprint.pprint(next(solutions))
+print()
+pprint.pprint(next(solutions))
+print()
+
