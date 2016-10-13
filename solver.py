@@ -1,9 +1,8 @@
+import pprint
 from collections import namedtuple
 
-from past import autotranslate
-# python-constraint is python2, so we'll use python-future's autotranslate function
-autotranslate(['constraint'])
-import constraint
+import itertools
+from ortools.constraint_solver import pywrapcp
 
 # periods is an int for how many periods per week are required for this subject
 Subject = namedtuple("subject", ['name', 'periods'])
@@ -11,9 +10,10 @@ Subject = namedtuple("subject", ['name', 'periods'])
 class Student:
     def __init__(self, subjects):
         self.subjects = subjects
-        self.periods = [
-            ['{subject_name}-period{period_num}'.format(subject_name=Subject.name, period_num=period_num) for period_num in range(subject.periods)]
-                for subject in subjects]
+        self.periods = list(itertools.chain(*[
+            ['{}-p{}'.format(subject.name, period_num)
+                for period_num in range(1, subject.periods+1)]
+                for subject in subjects]))
 
 
 def solve(students: list, subjects: list, max_students_per_class: int, periods_per_week: int):
@@ -25,22 +25,25 @@ def solve(students: list, subjects: list, max_students_per_class: int, periods_p
         subjects ([str]): The subjects that should appear on the timetable
         max_students_per_class (int): The number of students per class
     """
+    solver = pywrapcp.Solver("timetable")
 
-    problem = constraint.Problem()
+    periods = {
+        '{}-p{}'.format(subject.name, i): solver.IntVar(1, periods_per_week, '{}-p{}'.format(subject.name, i))
+        for subject in subjects
+        for i in range(1, subject.periods+1)
+    }
 
-    # Add one variable per subject period
-    for subject in subjects:
-        # Start numbering from 1
-        for period_num in range(1, subject.periods+1):
-            problem.addVariable('{subject_name}-period{period_num}'.format(subject_name=subject.name, period_num=period_num),
-                                constraint.Domain(range(1, periods_per_week + 1)))
-
-    # Each student is represented by a constraint that does not allow for his or her subjects to be on the same period
     for student in students:
-        problem.addConstraint(constraint.AllDifferentConstraint(), student.periods)
+        student_periods = [periods[period_name] for period_name in student.periods]
+        solver.AddConstraint(solver.AllDifferent(student_periods))
 
-    # TODO: Crashes because of py2/py3 incompatibility
-    problem.getSolution()
+    db = solver.Phase(list(periods.values()),
+                      solver.CHOOSE_MIN_SIZE_LOWEST_MAX,
+                      solver.ASSIGN_CENTER_VALUE)
+    solver.NewSearch(db)
+    solver.NextSolution()
+
+    pprint.pprint(periods)
 
 # Test data
 periods_per_week = 20
