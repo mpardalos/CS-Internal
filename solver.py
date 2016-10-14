@@ -1,8 +1,12 @@
+from typing import IO, List
 import pprint
-from collections import namedtuple
+from collections import namedtuple, defaultdict
+from sys import argv
+import json
 
 import itertools
 from ortools.constraint_solver import pywrapcp
+
 
 class Subject:
     def __init__(self, name: str, periods_per_week: int):
@@ -15,7 +19,11 @@ class Subject:
 
     def __hash__(self):
         return hash(self.name)
-        
+
+    def __repr__(self):
+        return "Subject: {}".format(self.name)
+
+
 def possible_timetables(students: list, periods_per_week: int):
     """
     Yield possible timetables
@@ -31,7 +39,7 @@ def possible_timetables(students: list, periods_per_week: int):
 
     # Flatten the list that contains each student's subjects and remove duplicates
     subjects = set(itertools.chain(*students))
-
+    
     # Get the list of all the periods for all subjects
     period_names = itertools.chain(*[subject.period_names for subject in subjects])
 
@@ -61,26 +69,41 @@ def possible_timetables(students: list, periods_per_week: int):
     solver.NewSearch(db)
 
     while solver.NextSolution():
-        yield {period_name: period_variable.Value() for period_name, period_variable in period_variables.items()}
+        yield {period_name: period_variable.Value() 
+                for period_name, period_variable 
+                in period_variables.items()
+            }
+
+def students_from_json_store(fp: IO) -> List:
+    """
+    Create a list of students and their subjects from a json file containing an object of the form:
+    {
+        subject_name: [student1, student2, ...]
+    }
+    
+    Args: 
+        fp: the file from which to load the data
+    """
+    # The json input is subjects mapped to their students
+    subjects = json.load(fp)
+    
+    # Invert the json input, from map of subjects -> student to one of students -> subjects
+    student_names = set(itertools.chain(*subjects.values()))
+
+    students = defaultdict(list)
+    for subject_name, subject_students in subjects.items():
+        for student_name in student_names:
+            if student_name in subject_students:
+                students[student_name].append(Subject(subject_name, 3 if 'HL' in subject_name else 2))
+
+    return list(students.values())
 
 
 if __name__ == '__main__':
-    # Test data
-    periods_per_week = 20
-    HistorySL = Subject("HistorySL", 2)
-    HistoryHL = Subject("HistoryHL", 3)
-    MathSL = Subject("MathSL", 2)
-    MathHL = Subject("MathHL", 3)
-    BiologySL = Subject("BiologySL", 2)
-    BiologyHL = Subject("BiologyHL", 3)
+    with open(argv[1]) as f:
+        # Get one possible timetable and print it
+        pprint.pprint(next(possible_timetables(students_from_json_store(f), 20)))
 
-    students = [
-        (HistorySL, MathHL),
-        (BiologySL, HistoryHL),
-        (MathSL, BiologyHL),
-        (HistorySL, BiologyHL)
-    ]
 
-    solutions = possible_timetables(students, periods_per_week)
 
-    pprint.pprint(next(solutions))
+
