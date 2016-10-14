@@ -1,4 +1,4 @@
-from typing import IO, List
+from typing import IO, List, Sequence, Dict, Generator
 import pprint
 from collections import namedtuple, defaultdict
 from sys import argv
@@ -9,7 +9,7 @@ from ortools.constraint_solver import pywrapcp
 
 
 class Subject:
-    def __init__(self, name: str, periods_per_week: int):
+    def __init__(self, name: str, periods_per_week: int) -> None:
         self.name = name
         self.periods_per_week = periods_per_week
         self.period_names = ['{}-p{}'.format(name, i) for i in range(1, periods_per_week+1)]
@@ -17,14 +17,14 @@ class Subject:
     def __eq__(self, other):
         return isinstance(other, type(self)) and self.name == other.name
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Subject: {}".format(self.name)
 
 
-def possible_timetables(students: list, periods_per_week: int):
+def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week: int) -> Generator[Dict[str, int], None, None]:
     """
     Yield possible timetables
     
@@ -33,7 +33,8 @@ def possible_timetables(students: list, periods_per_week: int):
         periods_per_week: The number of periods in the whole timetable
 
     Returns:
-        A dict of {period name: the position in the timetable that the period should occupy}
+        A generator that yields possible timetables in the form of dicts mapping period names to the position
+        in the timetable that they should occupy}
     """
     solver = pywrapcp.Solver("timetable")
 
@@ -69,10 +70,11 @@ def possible_timetables(students: list, periods_per_week: int):
     solver.NewSearch(db)
 
     while solver.NextSolution():
-        yield {period_name: period_variable.Value() 
-                for period_name, period_variable 
-                in period_variables.items()
-            }
+        yield {
+            period_name: period_variable.Value() 
+            for period_name, period_variable 
+            in period_variables.items()
+        }
 
 def students_from_json_store(fp: IO) -> List:
     """
@@ -88,9 +90,9 @@ def students_from_json_store(fp: IO) -> List:
     subjects = json.load(fp)
     
     # Invert the json input, from map of subjects -> student to one of students -> subjects
-    student_names = set(itertools.chain(*subjects.values()))
+    student_names = set(itertools.chain(*subjects.values())) 
 
-    students = defaultdict(list)
+    students = defaultdict(list) # type: defaultdict[str, List[Subject]]
     for subject_name, subject_students in subjects.items():
         for student_name in student_names:
             if student_name in subject_students:
