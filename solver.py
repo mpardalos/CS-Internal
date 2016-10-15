@@ -1,11 +1,13 @@
 from typing import IO, List, Sequence, Dict, Generator
 import pprint
 from collections import namedtuple, defaultdict
+from itertools import repeat
 from sys import argv
 import json
 
 import itertools
 from ortools.constraint_solver import pywrapcp
+from terminaltables import AsciiTable
 
 
 class Subject:
@@ -46,8 +48,9 @@ def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week:
 
     # Generate a dict of period_name:period_variable
     # We need a dict to be able to access each period's variable by name
-    period_variables = {period_name: solver.IntVar(1, periods_per_week+1, period_name) 
+    period_variables = {period_name: solver.IntVar(1, periods_per_week, period_name) 
                             for period_name in period_names}
+
 
     for student in students:
         # Get the list of all the periods for the student's subjects
@@ -100,11 +103,21 @@ def students_from_json_store(fp: IO) -> List:
 
     return list(students.values())
 
+def timetable_dict_to_ascii_table(timetable_dict: Dict[str, int]) -> str: 
+    flat_timetable = list(repeat('', 20))
+    for subject, period in timetable_dict.items():
+        flat_timetable[period - 1] += (subject + '\n')
+
+    # convert the flat list of periods into a 2D timetable
+    square_timetable = list(zip(*[flat_timetable[i:i+4] for i in range(0,len(flat_timetable), 4)]))
+    return AsciiTable([['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']] + square_timetable).table
+
 
 if __name__ == '__main__':
     with open(argv[1]) as f:
         # Get one possible timetable and print it
-        pprint.pprint(next(possible_timetables(students_from_json_store(f), 20)))
+        result = next(possible_timetables(students_from_json_store(f), 20))
+        print(timetable_dict_to_ascii_table(result))
 
 
 
