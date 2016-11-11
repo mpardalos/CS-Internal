@@ -4,8 +4,8 @@ import sys
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidgetItem, QWidget
 
+import main.models
 from main.models import Subject
-from main import json_loader
 MainWindowUI = uic.loadUiType(os.path.join('main', 'ui', 'main.ui'))[0]
 SubjectListWidgetUI = uic.loadUiType(os.path.join('main', 'ui', 'subject_list_widget.ui'))[0]
 
@@ -18,7 +18,7 @@ class MainWindow(QMainWindow, MainWindowUI):
 
         # Populate subject list
         with open(sys.argv[1]) as fp:
-            for subject in json_loader.subjects_from_json_store(fp):
+            for subject in main.models.Subject.subjects_from_json_store(fp):
                 item = QListWidgetItem()
                 widget = SubjectListWidget(subject, self.listWidget)
                 item.setSizeHint(widget.sizeHint())
