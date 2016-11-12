@@ -6,6 +6,7 @@ from typing import Sequence, Dict, Generator
 from ortools.constraint_solver import pywrapcp
 from terminaltables import AsciiTable
 
+from main import models
 from main.models import Subject
 
 
@@ -75,5 +76,5 @@ def timetable_dict_to_ascii_table(timetable_dict: Dict[str, int]) -> str:
 if __name__ == '__main__':
     with open(argv[1]) as f:
         # Get one possible timetable and print it
-        result = next(possible_timetables(Subject.students_from_json_store(f), 20))
+        result = next(possible_timetables(models.students_from_json_store(f), 20))
         print(timetable_dict_to_ascii_table(result))
