@@ -1,7 +1,7 @@
 import itertools
 from itertools import repeat
 from sys import argv
-from typing import Sequence, Dict, Generator
+from typing import Sequence, Dict, Generator, List
 
 from ortools.constraint_solver import pywrapcp
 from terminaltables import AsciiTable
@@ -9,9 +9,11 @@ from terminaltables import AsciiTable
 from main import models
 from main.models import Subject
 
+Solution = Dict[str, int]
+
 
 def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week: int) -> Generator[
-    Dict[str, int], None, None]:
+    Solution, None, None]:
     """
     Yield possible timetables
     
@@ -63,14 +65,18 @@ def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week:
             }
 
 
-def timetable_dict_to_ascii_table(timetable_dict: Dict[str, int]) -> str:
+def solution_to_square_timetable(solution: Solution):
     flat_timetable = list(repeat('', 20))
-    for subject, period in timetable_dict.items():
+    for subject, period in solution.items():
         flat_timetable[period - 1] += (subject + '\n')
 
-    # convert the flat list of periods into a 2D timetable
-    square_timetable = list(zip(*[flat_timetable[i:i + 4] for i in range(0, len(flat_timetable), 4)]))
-    return AsciiTable([['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']] + square_timetable).table
+    return list(zip(*[flat_timetable[i:i + 4] for i in range(0, len(flat_timetable), 4)]))
+
+
+def timetable_dict_to_ascii_table(solution: Solution) -> str:
+    return AsciiTable(
+        [['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']] + solution_to_square_timetable(solution)
+    ).table
 
 
 if __name__ == '__main__':
