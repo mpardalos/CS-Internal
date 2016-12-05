@@ -1,6 +1,10 @@
-from typing import List, Generator, Sequence
+from collections import defaultdict
+from pprint import pprint
+from typing import List, Generator, Sequence, Dict
 
 import sys
+
+import itertools
 from openpyxl import load_workbook
 from openpyxl.worksheet import Worksheet
 from openpyxl.cell import Cell
@@ -55,7 +59,19 @@ class Datastore:
             # HL
             yield Subject(name + '-hl', hl_periods_per_week, teacher_name, hl_students)
 
+    def get_students(self) -> Dict[str, List['Subject']]:
+        subjects = self.get_subjects()
+        subjects, subjects_copy = itertools.tee(subjects)
 
+        student_names = set(itertools.chain(*(sub.student_names for sub in subjects_copy)))
+
+        students = defaultdict(list)  # type: defaultdict[str, List[Subject]]
+        for subject in subjects:
+            for student_name in student_names:
+                if student_name in subject.student_names:
+                    students[student_name].append(subject)
+
+        return students
 
 
 class Subject:
@@ -78,6 +94,9 @@ class Subject:
 
 
 if __name__ == '__main__':
-    for s in Datastore(sys.argv[1]).get_subjects():
+    datastore = Datastore(sys.argv[1])
+    for s in datastore.get_subjects():
         print(s)
         print([s.teacher_name] + s.student_names)
+
+    pprint(datastore.get_students())
