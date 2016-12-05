@@ -1,7 +1,7 @@
 import itertools
 from itertools import repeat
 from sys import argv
-from typing import Sequence, Dict, Generator, List
+from typing import Sequence, Dict, Generator, List, Iterator
 
 from ortools.constraint_solver import pywrapcp
 from terminaltables import AsciiTable
@@ -12,8 +12,7 @@ from main.models import Subject
 Solution = Dict[str, int]
 
 
-def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week: int) -> Generator[
-    Solution, None, None]:
+def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week: int) -> Iterator[Solution]:
     """
     Yield possible timetables
     

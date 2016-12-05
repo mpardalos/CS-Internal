@@ -1,13 +1,12 @@
+import itertools
+import sys
 from collections import defaultdict
 from pprint import pprint
-from typing import List, Generator, Sequence, Dict
+from typing import List, Sequence, Dict, Iterator
 
-import sys
-
-import itertools
 from openpyxl import load_workbook
-from openpyxl.worksheet import Worksheet
 from openpyxl.cell import Cell
+from openpyxl.worksheet import Worksheet
 
 # Dirty dirty (but awesome) hack for debugging
 # e.g. the cell B4 containing 'test' would be repr'd as 'B4: test'
@@ -31,7 +30,7 @@ class Datastore:
 
         # TODO: Add validation
 
-    def get_subjects(self) -> Generator['Subject', None, None]:
+    def get_subjects(self) -> Iterator['Subject']:
         subject_name_row = list(self.worksheet.rows)[0][1:] # type: List[Cell]
         columns = list(self.worksheet.columns)
 
@@ -83,7 +82,7 @@ class Subject:
         self.student_names = student_names or []
         self.teacher_name = teacher_name
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return isinstance(other, type(self)) and self.name == other.name
 
     def __hash__(self) -> int:
