@@ -1,18 +1,16 @@
 import itertools
-from itertools import repeat
+from collections import defaultdict
 from sys import argv
-from typing import Sequence, Dict, Generator, List, Iterator
+from typing import Dict, List, Iterator
 
 from ortools.constraint_solver import pywrapcp
-from terminaltables import AsciiTable
 
 from main import models
+from main import views
 from main.models import Subject
 
-Solution = Dict[str, int]
 
-
-def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week: int) -> Iterator[Solution]:
+def possible_timetables(students: List[List[Subject]], periods_per_week: int) -> Iterator[views.Timetable]:
     """
     Yield possible timetables
     
@@ -21,7 +19,7 @@ def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week:
         periods_per_week: The number of periods in the whole timetable
 
     Returns:
-        A generator that yields possible timetables in the form of dicts mapping period names to the position
+        A generator that yields possible timetables in the form of dicts mapping subject names to the position
         in the timetable that they should occupy}
     """
     solver = pywrapcp.Solver("timetable")
@@ -34,7 +32,7 @@ def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week:
 
     # Generate a dict of period_name:period_variable
     # We need a dict to be able to access each period's variable by name
-    period_variables = {period_name: solver.IntVar(1, periods_per_week, period_name)
+    period_variables = {period_name: solver.IntVar(0, periods_per_week-1, period_name)
                         for period_name in period_names}
 
     for student in students:
@@ -57,29 +55,17 @@ def possible_timetables(students: Sequence[Sequence[Subject]], periods_per_week:
     solver.NewSearch(db)
 
     while solver.NextSolution():
-        yield {
-            period_name: period_variable.Value()
-            for period_name, period_variable
-            in period_variables.items()
-            }
+        subject_map = defaultdict(list)
+        for period_name, period_variable in period_variables.items():
+            for subject in subjects:
+                if period_name in subject.period_names:
+                    subject_map[subject].append(period_variable.Value())
 
-
-def solution_to_square_timetable(solution: Solution):
-    flat_timetable = list(repeat('', 20))
-    for subject, period in solution.items():
-        flat_timetable[period - 1] += (subject + '\n')
-
-    return list(zip(*[flat_timetable[i:i + 4] for i in range(0, len(flat_timetable), 4)]))
-
-
-def timetable_dict_to_ascii_table(solution: Solution) -> str:
-    return AsciiTable(
-        [['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']] + solution_to_square_timetable(solution)
-    ).table
+        yield subject_map
 
 
 if __name__ == '__main__':
     with open(argv[1]) as f:
         # Get one possible timetable and print it
         result = next(possible_timetables(models.students_from_json_store(f), 20))
-        print(timetable_dict_to_ascii_table(result))
+        print(views.timetable_dict_to_ascii_table(result))

@@ -38,7 +38,7 @@ class Datastore:
             column = columns[cell.col_idx-1]
 
             name = column[0].value
-            if name == '': break
+            if name == '' or name is None: break
 
             teacher_name = column[1].value
 
@@ -54,9 +54,9 @@ class Datastore:
             hl_students = [cell.value for cell in column[hl_marker_index+1:ending_marker_index]]
 
             # SL
-            yield Subject(name + '-sl', sl_periods_per_week, teacher_name, sl_students)
+            yield Subject(name + ' SL', sl_periods_per_week, teacher_name, sl_students)
             # HL
-            yield Subject(name + '-hl', hl_periods_per_week, teacher_name, hl_students)
+            yield Subject(name + ' HL', hl_periods_per_week, teacher_name, hl_students)
 
     def get_students(self) -> Dict[str, List['Subject']]:
         subjects = self.get_subjects()
