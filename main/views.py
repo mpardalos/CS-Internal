@@ -14,7 +14,8 @@ Timetable = Dict[models.Subject, List[int]]
 
 def timetable_to_workbook(timetable: Timetable, sheet_name: str='Timetable', periods_per_day: int=4):
     wb = Workbook()
-    ws = wb.create_sheet(sheet_name)
+    ws = wb.active
+    ws.title = sheet_name
 
     for subject in timetable:
         for period in timetable[subject]:
