@@ -1,7 +1,7 @@
 import itertools
+import sys
 from collections import defaultdict
-from sys import argv
-from typing import Dict, List, Iterator
+from typing import List, Iterator
 
 from ortools.constraint_solver import pywrapcp
 
@@ -32,7 +32,7 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
 
     # Generate a dict of period_name:period_variable
     # We need a dict to be able to access each period's variable by name
-    period_variables = {period_name: solver.IntVar(0, periods_per_week-1, period_name)
+    period_variables = {period_name: solver.IntVar(0, periods_per_week - 1, period_name)
                         for period_name in period_names}
 
     for student in students:
@@ -44,7 +44,7 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
             period_var
             for period_name, period_var in period_variables.items()
             if period_name in student_period_names
-            ]
+        ]
 
         # All of the student's periods must be scheduled at different times
         solver.AddConstraint(solver.AllDifferent(student_period_variables))
@@ -65,7 +65,6 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
 
 
 if __name__ == '__main__':
-    with open(argv[1]) as f:
-        # Get one possible timetable and print it
-        result = next(possible_timetables(models.students_from_json_store(f), 20))
-        print(views.timetable_dict_to_ascii_table(result))
+    ds = models.Datastore(sys.argv[1])
+    result = next(possible_timetables(list(ds.get_students().values()), 20))
+    print(views.timetable_dict_to_ascii_table(result))

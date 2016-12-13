@@ -13,6 +13,7 @@ from openpyxl.worksheet import Worksheet
 # noinspection PyUnresolvedReferences
 Cell.__repr__ = lambda self: "{coords}: {value}".format(coords=self.coordinate, value=self.value)
 
+
 def _find_in_cells(cells: Sequence[Cell], text: str) -> int:
     """
     Find the cell containing :param text: in :param cells:
@@ -24,21 +25,23 @@ def _find_in_cells(cells: Sequence[Cell], text: str) -> int:
     except StopIteration:
         return -1
 
+
 class Datastore:
     def __init__(self, fp: str, worksheet_name='Classes'):
-        self.worksheet = load_workbook(fp)[worksheet_name] # type: Worksheet
+        self.worksheet = load_workbook(fp)[worksheet_name]  # type: Worksheet
 
         # TODO: Add validation
 
     def get_subjects(self) -> Iterator['Subject']:
-        subject_name_row = list(self.worksheet.rows)[0][1:] # type: List[Cell]
+        subject_name_row = list(self.worksheet.rows)[0][1:]  # type: List[Cell]
         columns = list(self.worksheet.columns)
 
         for cell in subject_name_row:
-            column = columns[cell.col_idx-1]
+            column = columns[cell.col_idx - 1]
 
             name = column[0].value
-            if name == '' or name is None: break
+            if name == '' or name is None:
+                break
 
             teacher_name = column[1].value
 
@@ -49,9 +52,9 @@ class Datastore:
             # find index of the cell containing the text 'hl' and 'sl'
             sl_marker_index = _find_in_cells(column, 'sl')
             hl_marker_index = _find_in_cells(column, 'hl')
-            ending_marker_index = _find_in_cells(column, '') # TODO: handle early empty cell
-            sl_students = [cell.value for cell in column[sl_marker_index+1:hl_marker_index]]
-            hl_students = [cell.value for cell in column[hl_marker_index+1:ending_marker_index]]
+            ending_marker_index = _find_in_cells(column, '')  # TODO: handle early empty cell
+            sl_students = [cell.value for cell in column[sl_marker_index + 1:hl_marker_index]]
+            hl_students = [cell.value for cell in column[hl_marker_index + 1:ending_marker_index]]
 
             # SL
             yield Subject(name + ' SL', sl_periods_per_week, teacher_name, sl_students)
@@ -74,11 +77,11 @@ class Datastore:
 
 
 class Subject:
-    def __init__(self, name: str, periods_per_week: int, teacher_name: str,  student_names: List[str] = None) -> None:
+    def __init__(self, name: str, periods_per_week: int, teacher_name: str, student_names: List[str] = None) -> None:
         self.name = name
         self.periods_per_week = periods_per_week
         self.period_names = ['{}-p{}'.format(name, i)
-                for i in range(1, periods_per_week+1)]
+                             for i in range(1, periods_per_week + 1)]
         self.student_names = student_names or []
         self.teacher_name = teacher_name
 

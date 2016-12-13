@@ -12,7 +12,8 @@ from main import solver
 
 Timetable = Dict[models.Subject, List[int]]
 
-def timetable_to_workbook(timetable: Timetable, sheet_name: str='Timetable', periods_per_day: int=4):
+
+def timetable_to_workbook(timetable: Timetable, sheet_name: str = 'Timetable', periods_per_day: int = 4):
     wb = Workbook()
     ws = wb.active
     ws.title = sheet_name
@@ -50,5 +51,3 @@ if __name__ == '__main__':
 
     tt = solver.possible_timetables(students, 20)
     timetable_to_workbook(next(tt)).save('out.xlsx')
-
-
