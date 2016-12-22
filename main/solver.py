@@ -1,7 +1,7 @@
 import itertools
 import sys
 from collections import defaultdict
-from typing import List, Iterator
+from typing import List, Iterator, Dict
 
 from ortools.constraint_solver import pywrapcp
 
@@ -10,7 +10,7 @@ from main import views
 from main.models import Subject
 
 
-def possible_timetables(students: List[List[Subject]], periods_per_week: int) -> Iterator[views.Timetable]:
+def possible_timetables(students: List[List[Subject]], periods_per_week: int) -> Iterator[Dict[Subject, List[int]]]:
     """
     Yield possible timetables
     

@@ -12,7 +12,6 @@ from main import solver
 
 Timetable = Dict[models.Subject, List[int]]
 
-
 def timetable_to_workbook(timetable: Timetable, sheet_name: str = 'Timetable', periods_per_day: int = 4):
     wb = Workbook()
     ws = wb.active
