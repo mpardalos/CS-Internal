@@ -64,7 +64,10 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
         yield subject_map
 
 
-if __name__ == '__main__':
+def main():
     ds = models.Datastore(sys.argv[1])
     result = next(possible_timetables(list(ds.get_students().values()), 20))
     print(views.timetable_dict_to_ascii_table(result))
+
+if __name__ == '__main__':
+    main()

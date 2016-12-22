@@ -45,9 +45,12 @@ def timetable_dict_to_ascii_table(timetable: Timetable) -> str:
     ).table
 
 
-if __name__ == '__main__':
+def main():
     ds = models.Datastore(sys.argv[1])
     students = list(ds.get_students().values())
 
     tt = solver.possible_timetables(students, 20)
     timetable_to_workbook(next(tt)).save('out.xlsx')
+
+if __name__ == '__main__':
+    main()

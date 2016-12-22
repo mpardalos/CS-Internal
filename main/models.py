@@ -95,10 +95,13 @@ class Subject:
         return "Subject: {}".format(self.name)
 
 
-if __name__ == '__main__':
+def main():
     datastore = Datastore(sys.argv[1])
     for s in datastore.get_subjects():
         print(s)
         print([s.teacher_name] + s.student_names)
 
     pprint(datastore.get_students())
+
+if __name__ == '__main__':
+    main()
