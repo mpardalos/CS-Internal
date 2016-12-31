@@ -80,16 +80,19 @@ class Datastore:
                 # extra hl periods
                 yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name, hl_students)
 
-    def get_students(self) -> Dict[str, List['Subject']]:
+    def get_students(self, include_teachers: bool = True) -> Dict[str, List['Subject']]:
         subjects = self.get_subjects()
         subjects, subjects_copy = itertools.tee(subjects)
 
         student_names = set(itertools.chain(*(sub.student_names for sub in subjects_copy)))
+        if include_teachers:
+            subjects, subjects_copy = itertools.tee(subjects)
+            student_names = student_names.union(set(sub.teacher_name for sub in subjects_copy))
 
         students = defaultdict(list)  # type: defaultdict[str, List[Subject]]
         for subject in subjects:
             for student_name in student_names:
-                if student_name in subject.student_names:
+                if student_name in subject.student_names or student_name == subject.teacher_name:
                     students[student_name].append(subject)
 
         return students
