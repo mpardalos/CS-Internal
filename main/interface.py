@@ -12,6 +12,9 @@ MainWindowUI = uic.loadUiType(os.path.join('main', 'ui', 'main.ui'))[0]
 
 
 class MainWindow(QMainWindow, MainWindowUI):
+    # whether to include the teachers when generating the timetable.
+    # WARNING: takes an *extremely* long time
+    include_teachers = False
     def __init__(self, parent=None):
         # noinspection PyArgumentList
         super().__init__(parent)
@@ -33,6 +36,7 @@ class MainWindow(QMainWindow, MainWindowUI):
             try:
                 self.datastore = models.Datastore(self.input_file_name)
             except models.LoadingError as e:
+                # noinspection PyArgumentList
                 QMessageBox.critical(self, 'Invalid input file',
                                      'The file you selected had an error in cell {cell}: {msg}'
                                      .format(cell=e.cell.coordinate, msg=e))
@@ -45,7 +49,7 @@ class MainWindow(QMainWindow, MainWindowUI):
         # noinspection PyCallByClass,PyArgumentList
         output_filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save to', os.path.expanduser('~'))
 
-        students = list(self.datastore.get_students().values())
+        students = list(self.datastore.get_students(self.include_teachers).values())
 
         tt = solver.possible_timetables(students, 20)
         views.timetable_to_workbook(next(tt)).save(output_filename)

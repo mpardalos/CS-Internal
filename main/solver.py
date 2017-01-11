@@ -5,8 +5,7 @@ from typing import List, Iterator, Dict
 
 from ortools.constraint_solver import pywrapcp
 
-from main import models
-from main import views
+from main import models, views
 from main.models import Subject
 
 
@@ -44,7 +43,7 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
             period_var
             for period_name, period_var in period_variables.items()
             if period_name in student_period_names
-        ]
+            ]
 
         # All of the student's periods must be scheduled at different times
         solver.AddConstraint(solver.AllDifferent(student_period_variables))
@@ -68,6 +67,7 @@ def main():
     ds = models.Datastore(sys.argv[1])
     result = next(possible_timetables(list(ds.get_students().values()), 20))
     print(views.timetable_dict_to_ascii_table(result))
+
 
 if __name__ == '__main__':
     main()

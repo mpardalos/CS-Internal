@@ -59,7 +59,7 @@ class Datastore:
             if name in ('', None):
                 break
 
-            teacher_name = column[1].value
+            teacher_name = column[1].value.strip()
             sl_periods_per_week = column[2].value
             extra_hl_periods_per_week = column[3].value or 0
             hl_marker_index = _find_in_cells(column, 'HL')
@@ -73,21 +73,30 @@ class Datastore:
                 yield Subject(name, sl_periods_per_week, teacher_name, students)
             # If there are both sl and hl students in the subject
             else:
-                sl_students = [cell.value for cell in column[4:hl_marker_index]]
-                hl_students = [cell.value for cell in column[hl_marker_index + 1:ending_marker_index]]
+                sl_students = [cell.value.strip() for cell in column[4:hl_marker_index]]
+                hl_students = [cell.value.strip() for cell in column[hl_marker_index + 1:ending_marker_index]]
                 # common periods
                 yield Subject(name + ' SL+HL', sl_periods_per_week, teacher_name, sl_students + hl_students)
                 # extra hl periods
                 yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name, hl_students)
 
-    def get_students(self, include_teachers: bool = True) -> Dict[str, List['Subject']]:
-        subjects = self.get_subjects()
-        subjects, subjects_copy = itertools.tee(subjects)
+    def get_students(self, include_teachers: bool = False) -> Dict[str, List['Subject']]:
+        """
+        Find which subjects each student has
+        Args:
+            include_teachers: if True, include teachers in the result, i.e. which subjects each teacher teaches.
 
-        student_names = set(itertools.chain(*(sub.student_names for sub in subjects_copy)))
+        Returns:
+            A Dict, mapping student name -> list of subjects
+
+        """
+        subjects = list(self.get_subjects())
+
+        student_names = list(set(itertools.chain(*(sub.student_names for sub in subjects))))
         if include_teachers:
-            subjects, subjects_copy = itertools.tee(subjects)
-            student_names = student_names.union(set(sub.teacher_name for sub in subjects_copy))
+            for sub in subjects:
+                if sub.teacher_name not in student_names:
+                    student_names.append(sub.teacher_name)
 
         students = defaultdict(list)  # type: defaultdict[str, List[Subject]]
         for subject in subjects:
