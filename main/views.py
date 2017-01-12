@@ -23,8 +23,8 @@ def timetable_to_workbook(timetable: Timetable, sheet_name: str = 'Timetable', p
             # since everything is zero-indexed, floor division by the number of periods in a day gives us the day to
             # which the period belongs, # i.e. for 4 periods in a day 0-3 -> day 0 (Monday) , 4-7 -> day 1 (Tuesday)...
             # and the modulo by four gives the period in that day
-            day = period // 4
-            period_in_day = period % 4
+            day = period // periods_per_day
+            period_in_day = period % periods_per_day
 
             cell = ws['{}{}'.format(ascii_uppercase[day], period_in_day + 1)]
             cell.value = (cell.value or '') + subject.name + '\n'
