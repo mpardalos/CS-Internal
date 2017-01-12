@@ -12,6 +12,7 @@ from main import solver
 
 Timetable = Dict[models.Subject, List[int]]
 
+
 def timetable_to_workbook(timetable: Timetable, sheet_name: str = 'Timetable', periods_per_day: int = 4):
     wb = Workbook()
     ws = wb.active
@@ -19,7 +20,10 @@ def timetable_to_workbook(timetable: Timetable, sheet_name: str = 'Timetable', p
 
     for subject in timetable:
         for period in timetable[subject]:
-            # TODO: error when some period is out of bounds (e.g. period 200 when there are just 4 periods / day)
+            if period > 5 * periods_per_day:
+                raise ValueError("There is no period number {} when there are just {} periods per day"
+                                 .format(period, periods_per_day))
+
             # since everything is zero-indexed, floor division by the number of periods in a day gives us the day to
             # which the period belongs, # i.e. for 4 periods in a day 0-3 -> day 0 (Monday) , 4-7 -> day 1 (Tuesday)...
             # and the modulo by four gives the period in that day
@@ -50,6 +54,7 @@ def main():
 
     tt = solver.possible_timetables(students, 20)
     timetable_to_workbook(next(tt)).save('out.xlsx')
+
 
 if __name__ == '__main__':
     main()
