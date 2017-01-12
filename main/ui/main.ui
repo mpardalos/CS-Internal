@@ -110,8 +110,26 @@
      <height>30</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Optio&amp;ns</string>
+    </property>
+    <addaction name="actionIncludeTeachers"/>
+   </widget>
+   <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionIncludeTeachers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Include Teachers</string>
+   </property>
+   <property name="toolTip">
+    <string>Ensure that no teachers have two subjects per period</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
