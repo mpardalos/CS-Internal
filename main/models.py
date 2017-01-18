@@ -89,8 +89,10 @@ class Datastore:
             sl_periods_per_week = column[2].value
             extra_hl_periods_per_week = column[3].value or 0
             hl_marker_index = _find_in_cells(column, 'HL')
-            ending_marker_index = _find_in_cells(column[4:], '') + 4  # Index of the first empty cell after the students
-            if ending_marker_index <= 4:  # occurs if the empty cell is not in the cells returned by the library
+            # Index of the first empty cell after the students
+            ending_marker_index = _find_in_cells(column[4:], '') + 4  
+            # occurs if the empty cell is not in the cells returned by the library
+            if ending_marker_index <= 4:  
                 ending_marker_index = len(column)
 
             # If there is only one group in the subject
@@ -100,17 +102,21 @@ class Datastore:
             # If there are both sl and hl students in the subject
             else:
                 sl_students = [cell.value.strip() for cell in column[4:hl_marker_index]]
-                hl_students = [cell.value.strip() for cell in column[hl_marker_index + 1:ending_marker_index]]
+                hl_students = [cell.value.strip() for cell 
+                               in column[hl_marker_index + 1:ending_marker_index]]
                 # common periods
-                yield Subject(name + ' SL+HL', sl_periods_per_week, teacher_name, sl_students + hl_students)
+                yield Subject(name + ' SL+HL', sl_periods_per_week, teacher_name, 
+                        sl_students + hl_students)
                 # extra hl periods
-                yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name, hl_students)
+                yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name, 
+                        hl_students)
 
     def get_students(self, include_teachers: bool = False) -> Dict[str, List['Subject']]:
         """
         Find which subjects each student has
         Args:
-            include_teachers: if True, include teachers in the result, i.e. which subjects each teacher teaches.
+            include_teachers: if True, include teachers in the result, i.e. which subjects 
+            each teacher teaches.
 
         Returns:
             A Dict, mapping student name -> list of subjects
@@ -127,14 +133,16 @@ class Datastore:
         students = defaultdict(list)  # type: defaultdict[str, List[Subject]]
         for subject in subjects:
             for student_name in student_names:
-                if student_name in subject.student_names or student_name == subject.teacher_name:
+                if (student_name in subject.student_names or 
+                        student_name == subject.teacher_name):
                     students[student_name].append(subject)
 
         return students
 
 
 class Subject:
-    def __init__(self, name: str, periods_per_week: int, teacher_name: str, student_names: List[str]) -> None:
+    def __init__(self, name: str, periods_per_week: int, teacher_name: str, 
+            student_names: List[str]) -> None:
         self.name = name
         self.periods_per_week = periods_per_week
         self.period_names = ['{}-p{}'.format(name, i)

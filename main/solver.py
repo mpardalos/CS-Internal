@@ -9,17 +9,19 @@ from main import models, views
 from main.models import Subject
 
 
-def possible_timetables(students: List[List[Subject]], periods_per_week: int) -> Iterator[Dict[Subject, List[int]]]:
+def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->\
+    Iterator[Dict[Subject, List[int]]]:
     """
     Yield possible timetables
     
     Args:
-        students: a list of tuples of Subjects, one for each student, containing that student's Subjects
+        students: a list of tuples of Subjects, one for each student, containing that
+        student's Subjects
         periods_per_week: The number of periods in the whole timetable
 
     Returns:
-        A generator that yields possible timetables in the form of dicts mapping subject names to the position
-        in the timetable that they should occupy}
+        A generator that yields possible timetables in the form of dicts mapping subject
+        names to the position in the timetable that they should occupy}
     """
     solver = pywrapcp.Solver("timetable")
 
@@ -36,7 +38,9 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
 
     for student in students:
         # Get the list of all the periods for the student's subjects
-        student_period_names = list(itertools.chain(*[subject.period_names for subject in student]))
+        student_period_names = list(
+            itertools.chain(*[subject.period_names for subject in student])
+        )
 
         # Filter the list of all periods to get only those that the student is a part of
         student_period_variables = [

@@ -28,15 +28,16 @@ class MainWindow(QMainWindow, MainWindowUI):
 
     def get_file_to_open(self):
         # noinspection PyCallByClass,PyArgumentList
-        self.input_file_name, _ = QFileDialog.getOpenFileName(self, 'Choose File to Open', os.path.expanduser('~'))
+        self.input_file_name, _ = QFileDialog.getOpenFileName(self, 'Choose File to Open',
+                os.path.expanduser('~'))
         if self.input_file_name != '':
             try:
                 self.datastore = models.Datastore(self.input_file_name)
             except models.LoadingError as e:
                 # noinspection PyArgumentList
                 QMessageBox.critical(self, 'Invalid input file',
-                                     'The file you selected had an error in cell {cell}: {msg}'
-                                     .format(cell=e.cell.coordinate, msg=e))
+                    'The file you selected had an error in cell {cell}: {msg}'
+                    .format(cell=e.cell.coordinate, msg=e))
             else:
                 self.statusbar.showMessage('Opened {}'.format(self.input_file_name))
                 self.write_button.setEnabled(True)
