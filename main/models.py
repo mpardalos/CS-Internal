@@ -12,6 +12,13 @@ from openpyxl.worksheet import Worksheet
 # noinspection PyUnresolvedReferences
 Cell.__repr__ = lambda self: "{coords}: {value}".format(coords=self.coordinate, value=self.value)
 
+def is_empty(cell: Cell):
+    """
+    Check whether an openpyxl Cell is empty
+    Args: 
+        cell: the Cell to check
+    """
+    return (cell.value or '').strip() == ''
 
 def _find_in_cells(cells: Sequence[Cell], text: str) -> int:
     """
@@ -42,7 +49,26 @@ class Datastore:
     def __init__(self, fp: str, worksheet_name='Classes'):
         self.worksheet = load_workbook(fp)[worksheet_name]  # type: Worksheet
 
-        last_column_index = next(idx for idx, col in enumerate(self.worksheet.columns) if col[0].value in (None, ''))
+        ending_column_index = 1
+        for i, column in enumerate(self.worksheet.columns):
+            if is_empty(column[0]):
+                # if the two top cells are empty assume the rest of the column is too
+                if is_empty(column[1]):
+                    ending_column_index = i
+                    break
+                else:
+                   raise LoadingError("Each subject must have a name", column[0])
+        else:
+            ending_column_index = i
+
+        for column in list(self.worksheet.columns)[1:ending_column_index-1]:
+            if column[1].value in ('', None):
+                print(column[0])
+                print(column[1])
+                raise LoadingError("Each subject must have a teacher", column[1])
+            if column[2].value in ('', None):
+                raise LoadingError("Each subject must have a number of periods", column[2])
+
 
     def get_subjects(self) -> Iterator['Subject']:
         """
