@@ -99,13 +99,18 @@ class Datastore:
 
             # If there is only one group in the subject
             if hl_marker_index == -1:
-                students = [cell.value for cell in column[4:ending_marker_index]]
+                students = [cell.value for cell in column[4:ending_marker_index] if
+                        cell.value != None]
+                if len(students) == 0:
+                    continue
                 yield Subject(name, sl_periods_per_week, teacher_name, students)
             # If there are both sl and hl students in the subject
             else:
                 sl_students = [cell.value.strip() for cell in column[4:hl_marker_index]]
                 hl_students = [cell.value.strip() for cell 
                                in column[hl_marker_index + 1:ending_marker_index]]
+                if len(sl_students) == len(hl_students) == 0:
+                    continue
                 # common periods
                 yield Subject(name + ' SL+HL', sl_periods_per_week, teacher_name, 
                         sl_students + hl_students)
