@@ -6,7 +6,7 @@ from typing import List, Iterator, Dict
 from ortools.constraint_solver import pywrapcp
 
 from main import models, views
-from main.models import Subject
+from main.models import Subject, LoadingError
 
 
 def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->\
@@ -68,9 +68,13 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
 
 
 def main():
-    ds = models.Datastore(sys.argv[1])
-    result = next(possible_timetables(list(ds.get_students().values()), 20))
-    print(views.timetable_dict_to_ascii_table(result))
+    try:
+        ds = models.Datastore(sys.argv[1])
+    except LoadingError as e:
+        print(f'Loading Error in cell {e.cell.coordinate}: {str(e)}')
+    else:
+        result = next(possible_timetables(list(ds.get_students().values()), 20))
+        print(views.timetable_dict_to_ascii_table(result))
 
 
 if __name__ == '__main__':
