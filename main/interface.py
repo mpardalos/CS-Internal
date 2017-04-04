@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
@@ -23,6 +24,7 @@ class MainWindow(QMainWindow, MainWindowUI):
 
         self.open_button.clicked.connect(self.get_students)
         self.write_button.clicked.connect(self.generate_timetable)
+        self.actionCreateTemplate.triggered.connect(self.create_template)
 
         self.students = []
 
@@ -48,7 +50,6 @@ class MainWindow(QMainWindow, MainWindowUI):
                 self.statusbar.showMessage('Opened {}'.format(self.input_file_name))
                 self.write_button.setEnabled(True)
 
-
     def generate_timetable(self):
         # noinspection PyCallByClass,PyArgumentList
         output_filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save to', os.path.expanduser('~'))
@@ -59,6 +60,13 @@ class MainWindow(QMainWindow, MainWindowUI):
         views.timetable_to_workbook(next(tt)).save(output_filename)
 
         self.statusbar.showMessage('Saved to {}'.format(output_filename))
+
+    def create_template(self):
+        filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save template to', os.path.expanduser('~'))
+
+        shutil.copyfile(os.path.join('resources', 'template.xlsx'), filename)
+
+
 
 
 def main():

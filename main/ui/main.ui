@@ -107,7 +107,7 @@
      <x>0</x>
      <y>0</y>
      <width>427</width>
-     <height>30</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -115,6 +115,7 @@
      <string>Optio&amp;ns</string>
     </property>
     <addaction name="actionIncludeTeachers"/>
+    <addaction name="actionCreateTemplate"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -127,10 +128,18 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Include Teachers</string>
+    <string>&amp;Include Teachers</string>
    </property>
    <property name="toolTip">
     <string>Ensure that no teachers have two subjects per period</string>
+   </property>
+  </action>
+  <action name="actionCreateTemplate">
+   <property name="text">
+    <string>&amp;Create template students file</string>
+   </property>
+   <property name="toolTip">
+    <string>Create an empty file to input student data to</string>
    </property>
   </action>
  </widget>
