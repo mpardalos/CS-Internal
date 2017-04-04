@@ -70,10 +70,11 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
 def main():
     try:
         ds = models.Datastore(sys.argv[1])
+        students = list(ds.get_students().values())
     except LoadingError as e:
         print(f'Loading Error in cell {e.cell.coordinate}: {str(e)}')
     else:
-        result = next(possible_timetables(list(ds.get_students().values()), 20))
+        result = next(possible_timetables(students, 20))
         print(views.timetable_dict_to_ascii_table(result))
 
 
