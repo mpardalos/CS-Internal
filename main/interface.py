@@ -53,6 +53,8 @@ class MainWindow(QMainWindow, MainWindowUI):
         # noinspection PyCallByClass,PyArgumentList
         output_filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save to', os.path.expanduser('~'))
 
+        self.statusbar.showMessage('Processing...')
+
         tt = solver.possible_timetables(self.students, 20)
         views.timetable_to_workbook(next(tt)).save(output_filename)
 
