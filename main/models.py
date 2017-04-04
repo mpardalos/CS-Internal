@@ -88,7 +88,12 @@ class Datastore:
             teacher_name = (column[1].value or '').strip()
             if teacher_name == '':
                 raise LoadingError('All subjects must have a teacher name', column[1])
-            sl_periods_per_week = column[2].value
+
+            periods_per_week = column[2].value or 0
+            if periods_per_week == 0:
+                raise LoadingError('All subject must have a certain number of periods per'
+                ' week', column[2])
+
             extra_hl_periods_per_week = column[3].value or 0
             hl_marker_index = _find_in_cells(column, 'HL')
             # Index of the first empty cell after the students
@@ -103,7 +108,7 @@ class Datastore:
                         cell.value != None]
                 if len(students) == 0:
                     continue
-                yield Subject(name, sl_periods_per_week, teacher_name, students)
+                yield Subject(name, periods_per_week, teacher_name, students)
             # If there are both sl and hl students in the subject
             else:
                 sl_students = [cell.value.strip() for cell in column[4:hl_marker_index]]
@@ -112,7 +117,7 @@ class Datastore:
                 if len(sl_students) == len(hl_students) == 0:
                     continue
                 # common periods
-                yield Subject(name + ' SL+HL', sl_periods_per_week, teacher_name, 
+                yield Subject(name + ' SL+HL', periods_per_week, teacher_name, 
                         sl_students + hl_students)
                 # extra hl periods
                 yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name, 
