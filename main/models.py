@@ -85,7 +85,9 @@ class Datastore:
             if name in ('', None):
                 break
 
-            teacher_name = column[1].value.strip()
+            teacher_name = (column[1].value or '').strip()
+            if teacher_name == '':
+                raise LoadingError('All subjects must have a teacher name', column[1])
             sl_periods_per_week = column[2].value
             extra_hl_periods_per_week = column[3].value or 0
             hl_marker_index = _find_in_cells(column, 'HL')
@@ -111,7 +113,7 @@ class Datastore:
                 yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name, 
                         hl_students)
 
-    def get_students(self, include_teachers: bool = False) -> Dict[str, List['Subject']]:
+    def get_students(self, include_teachers: bool = True) -> Dict[str, List['Subject']]:
         """
         Find which subjects each student has
         Args:
