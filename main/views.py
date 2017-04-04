@@ -5,6 +5,7 @@ import itertools
 from typing import Dict, List
 
 from openpyxl import Workbook
+from openpyxl.styles import Alignment
 from terminaltables import AsciiTable
 
 from main import models
@@ -31,7 +32,15 @@ def timetable_to_workbook(timetable: Timetable, sheet_name: str = 'Timetable', p
             period_in_day = period % periods_per_day
 
             cell = ws['{}{}'.format(ascii_uppercase[day], period_in_day + 1)]
-            cell.value = (cell.value or '') + subject.name + '\n'
+
+            if cell.value == None:
+                cell.value = ''
+        
+            if cell.value != '':
+                cell.value += '\n'
+            cell.value += subject.name
+
+            cell.alignment = Alignment(wrapText=True)
 
     return wb
 
