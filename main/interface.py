@@ -21,18 +21,24 @@ class MainWindow(QMainWindow, MainWindowUI):
 
         self.write_button.setEnabled(False)
 
-        self.open_button.clicked.connect(self.get_file_to_open)
+        self.open_button.clicked.connect(self.get_students)
         self.write_button.clicked.connect(self.generate_timetable)
 
-        self.datastore = None
+        self.students = []
 
-    def get_file_to_open(self):
+    def get_students(self):
+        """
+            Get the list of students from a user-selected file and store it in
+            MainWindow.students
+        """
         # noinspection PyCallByClass,PyArgumentList
         self.input_file_name, _ = QFileDialog.getOpenFileName(self, 'Choose File to Open',
                 os.path.expanduser('~'))
         if self.input_file_name != '':
             try:
                 self.datastore = models.Datastore(self.input_file_name)
+                self.students = list(self.datastore
+                        .get_students(self.actionIncludeTeachers.isChecked()).values())
             except models.LoadingError as e:
                 # noinspection PyArgumentList
                 QMessageBox.critical(self, 'Invalid input file',
@@ -47,9 +53,7 @@ class MainWindow(QMainWindow, MainWindowUI):
         # noinspection PyCallByClass,PyArgumentList
         output_filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save to', os.path.expanduser('~'))
 
-        students = list(self.datastore.get_students(self.actionIncludeTeachers.isChecked()).values())
-
-        tt = solver.possible_timetables(students, 20)
+        tt = solver.possible_timetables(self.students, 20)
         views.timetable_to_workbook(next(tt)).save(output_filename)
 
         self.statusbar.showMessage('Saved to {}'.format(output_filename))
