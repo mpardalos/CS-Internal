@@ -3,6 +3,7 @@ import sys
 from collections import defaultdict
 from typing import List, Sequence, Dict, Iterator
 
+import openpyxl
 from openpyxl import load_workbook
 from openpyxl.cell import Cell
 from openpyxl.worksheet import Worksheet
@@ -52,6 +53,8 @@ class Datastore:
         except KeyError as e:
             raise LoadingError('The file must have a worksheet named "Classes" containing'
             ' the data to use')
+        except openpyxl.utils.exceptions.InvalidFileException as e:
+            raise LoadingError('You must select a Microsoft Excel file (.xlsx)')
 
         ending_column_index = 1
         for i, column in enumerate(self.worksheet.columns):
