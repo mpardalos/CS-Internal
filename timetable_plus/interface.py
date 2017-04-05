@@ -5,11 +5,11 @@ import shutil
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 
-from main import models
-from main import solver
-from main import views
+from timetable_plus import models
+from timetable_plus import solver
+from timetable_plus import views
 
-MainWindowUI = uic.loadUiType(os.path.join('main', 'ui', 'main.ui'))[0]
+MainWindowUI = uic.loadUiType(os.path.join('timetable_plus', 'ui', 'main.ui'))[0]
 
 
 class MainWindow(QMainWindow, MainWindowUI):
@@ -18,7 +18,7 @@ class MainWindow(QMainWindow, MainWindowUI):
         super().__init__(parent)
 
         self.setupUi(self)
-        self.setWindowTitle('Choose Students file')
+        self.setWindowTitle('Timetable+')
 
         self.write_button.setEnabled(False)
 

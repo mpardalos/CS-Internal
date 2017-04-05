@@ -5,8 +5,8 @@ from typing import List, Iterator, Dict
 
 from ortools.constraint_solver import pywrapcp
 
-from main import models, views
-from main.models import Subject, LoadingError
+from timetable_plus import models, views
+from timetable_plus.models import Subject, LoadingError
 
 
 def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->\

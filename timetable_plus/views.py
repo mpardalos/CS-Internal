@@ -8,8 +8,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from terminaltables import AsciiTable
 
-from main import models
-from main import solver
+from timetable_plus import models
+from timetable_plus import solver
 
 Timetable = Dict[models.Subject, List[int]]
 

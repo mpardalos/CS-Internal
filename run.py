@@ -1,3 +1,3 @@
-from main.solver import main
+from timetable_plus.solver import main
 
 main()

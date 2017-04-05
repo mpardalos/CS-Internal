@@ -1,3 +1,3 @@
-from main.interface import main
+from timetable_plus.interface import main
 
 main()
