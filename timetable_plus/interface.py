@@ -54,7 +54,7 @@ class MainWindow(QMainWindow, MainWindowUI):
         # noinspection PyCallByClass,PyArgumentList
         output_filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save to',
                 os.path.join(os.path.expanduser('~'), 'timetable.xlsx'),
-                'Microsoft Excel Spreadsheet Files (*.xlsx *.xls)')
+                'Microsoft Excel Spreadsheet Files (*.xlsx *.xls);;All Files')
 
         if output_filename != '':
             self.statusbar.showMessage('Processing...')
@@ -67,7 +67,7 @@ class MainWindow(QMainWindow, MainWindowUI):
     def create_template(self):
         filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save template to', 
                 os.path.join(os.path.expanduser('~'), 'template.xlsx'), 
-                'Microsoft Excel Spreadsheet Files (*.xlsx *.xls);; All Files')
+                'Microsoft Excel Spreadsheet Files (*.xlsx *.xls);;All Files')
 
         if filename != '':
             shutil.copyfile(os.path.join('resources', 'template.xlsx'), filename)
