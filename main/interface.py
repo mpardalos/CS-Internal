@@ -56,12 +56,13 @@ class MainWindow(QMainWindow, MainWindowUI):
                 os.path.join(os.path.expanduser('~'), 'timetable.xlsx'),
                 'Microsoft Excel Spreadsheet Files (*.xlsx *.xls)')
 
-        self.statusbar.showMessage('Processing...')
+        if output_filename != '':
+            self.statusbar.showMessage('Processing...')
 
-        tt = solver.possible_timetables(self.students, 20)
-        views.timetable_to_workbook(next(tt)).save(output_filename)
+            tt = solver.possible_timetables(self.students, 20)
+            views.timetable_to_workbook(next(tt)).save(output_filename)
 
-        self.statusbar.showMessage('Saved to {}'.format(output_filename))
+            self.statusbar.showMessage('Saved to {}'.format(output_filename))
 
     def create_template(self):
         filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save template to', os.path.expanduser('~'))
