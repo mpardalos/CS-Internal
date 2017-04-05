@@ -47,7 +47,11 @@ class Datastore:
     student_list_start_row_index = 4
 
     def __init__(self, fp: str, worksheet_name='Classes'):
-        self.worksheet = load_workbook(fp)[worksheet_name]  # type: Worksheet
+        try:
+            self.worksheet = load_workbook(fp)[worksheet_name]  # type: Worksheet
+        except KeyError as e:
+            raise LoadingError('The file must have a worksheet named "Classes" containing'
+            ' the data to use')
 
         ending_column_index = 1
         for i, column in enumerate(self.worksheet.columns):

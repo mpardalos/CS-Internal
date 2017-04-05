@@ -43,9 +43,12 @@ class MainWindow(QMainWindow, MainWindowUI):
                         .get_students(self.actionIncludeTeachers.isChecked()).values())
             except models.LoadingError as e:
                 # noinspection PyArgumentList
-                QMessageBox.critical(self, 'Invalid input file',
-                    'The file you selected had an error in cell {cell}: {msg}'
-                    .format(cell=e.cell.coordinate, msg=e))
+                if e.cell != None:
+                    QMessageBox.critical(self, 'Invalid input file',
+                        f'The file you selected had an error in cell {e.cell.coordinate}: {str(e)}'
+                        .format(cell=e.cell.coordinate, msg=e))
+                else:
+                    QMessageBox.critical(self, 'Invalid input file', f'The file you selected had an error: {str(e)}')
             else:
                 self.statusbar.showMessage('Opened {}'.format(self.input_file_name))
                 self.write_button.setEnabled(True)
