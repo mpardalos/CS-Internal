@@ -52,7 +52,9 @@ class MainWindow(QMainWindow, MainWindowUI):
 
     def generate_timetable(self):
         # noinspection PyCallByClass,PyArgumentList
-        output_filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save to', os.path.expanduser('~'))
+        output_filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save to',
+                os.path.join(os.path.expanduser('~'), 'timetable.xlsx'),
+                'Microsoft Excel Spreadsheet Files (*.xlsx *.xls)')
 
         self.statusbar.showMessage('Processing...')
 
@@ -65,9 +67,6 @@ class MainWindow(QMainWindow, MainWindowUI):
         filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save template to', os.path.expanduser('~'))
 
         shutil.copyfile(os.path.join('resources', 'template.xlsx'), filename)
-
-
-
 
 def main():
     app = QApplication(sys.argv)
