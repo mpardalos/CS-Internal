@@ -35,7 +35,7 @@ class MainWindow(QMainWindow, MainWindowUI):
         """
         # noinspection PyCallByClass,PyArgumentList
         self.input_file_name, _ = QFileDialog.getOpenFileName(self, 'Choose File to Open',
-                os.path.expanduser('~'))
+                os.path.expanduser('~'), 'Microsoft Excel Spreadsheet Files (*.xlsx *.xls)')
         if self.input_file_name != '':
             try:
                 self.datastore = models.Datastore(self.input_file_name)
