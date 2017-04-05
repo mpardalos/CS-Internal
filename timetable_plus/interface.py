@@ -65,9 +65,12 @@ class MainWindow(QMainWindow, MainWindowUI):
             self.statusbar.showMessage('Saved to {}'.format(output_filename))
 
     def create_template(self):
-        filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save template to', os.path.expanduser('~'))
+        filename, _ = QFileDialog.getSaveFileName(self, 'Choose File to Save template to', 
+                os.path.join(os.path.expanduser('~'), 'template.xlsx'), 
+                'Microsoft Excel Spreadsheet Files (*.xlsx *.xls);; All Files')
 
-        shutil.copyfile(os.path.join('resources', 'template.xlsx'), filename)
+        if filename != '':
+            shutil.copyfile(os.path.join('resources', 'template.xlsx'), filename)
 
 def main():
     app = QApplication(sys.argv)
