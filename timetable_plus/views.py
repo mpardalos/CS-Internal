@@ -33,7 +33,7 @@ def timetable_to_workbook(timetable: Timetable, sheet_name: str = 'Timetable', p
 
             cell = ws['{}{}'.format(ascii_uppercase[day], period_in_day + 1)]
 
-            if cell.value == None:
+            if cell.value is None:
                 cell.value = ''
         
             if cell.value != '':

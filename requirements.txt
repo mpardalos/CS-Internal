@@ -1,5 +1,4 @@
-openpyxl==2.4.1
-ortools-examples==5.0.3919
-py3-ortools==5.0.3919
-PyQt5==5.7.1
-terminaltables==3.1.0
+openpyxl
+py3-ortools
+PyQt5
+terminaltables

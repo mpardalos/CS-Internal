@@ -13,6 +13,7 @@ from openpyxl.worksheet import Worksheet
 # noinspection PyUnresolvedReferences
 Cell.__repr__ = lambda self: "{coords}: {value}".format(coords=self.coordinate, value=self.value)
 
+
 def is_empty(cell: Cell):
     """
     Check whether an openpyxl Cell is empty
@@ -20,6 +21,7 @@ def is_empty(cell: Cell):
         cell: the Cell to check
     """
     return (cell.value or '').strip() == ''
+
 
 def _find_in_cells(cells: Sequence[Cell], text: str) -> int:
     """
@@ -50,10 +52,10 @@ class Datastore:
     def __init__(self, fp: str, worksheet_name='Classes'):
         try:
             self.worksheet = load_workbook(fp)[worksheet_name]  # type: Worksheet
-        except KeyError as e:
+        except KeyError:
             raise LoadingError('The file must have a worksheet named "Classes" containing'
-            ' the data to use')
-        except openpyxl.utils.exceptions.InvalidFileException as e:
+                               ' the data to use')
+        except openpyxl.utils.exceptions.InvalidFileException:
             raise LoadingError('You must select a Microsoft Excel file (.xlsx)')
 
         ending_column_index = 1
@@ -64,18 +66,17 @@ class Datastore:
                     ending_column_index = i
                     break
                 else:
-                   raise LoadingError("Each subject must have a name", column[0])
+                    raise LoadingError("Each subject must have a name", column[0])
         else:
             ending_column_index = i
 
-        for column in list(self.worksheet.columns)[1:ending_column_index-1]:
+        for column in list(self.worksheet.columns)[1:ending_column_index - 1]:
             if column[1].value in ('', None):
                 print(column[0])
                 print(column[1])
                 raise LoadingError("Each subject must have a teacher", column[1])
             if column[2].value in ('', None):
                 raise LoadingError("Each subject must have a number of periods", column[2])
-
 
     def get_subjects(self) -> Iterator['Subject']:
         """
@@ -99,36 +100,36 @@ class Datastore:
             periods_per_week = column[2].value or 0
             if periods_per_week == 0:
                 raise LoadingError('All subject must have a certain number of periods per'
-                ' week', column[2])
+                                   ' week', column[2])
 
             extra_hl_periods_per_week = column[3].value or 0
             hl_marker_index = _find_in_cells(column, 'HL')
             # Index of the first empty cell after the students
-            ending_marker_index = _find_in_cells(column[4:], '') + 4  
+            ending_marker_index = _find_in_cells(column[4:], '') + 4
             # occurs if the empty cell is not in the cells returned by the library
-            if ending_marker_index <= 4:  
+            if ending_marker_index <= 4:
                 ending_marker_index = len(column)
 
             # If there is only one group in the subject
             if hl_marker_index == -1:
                 students = [cell.value for cell in column[4:ending_marker_index] if
-                        cell.value != None]
+                            cell.value is not None]
                 if len(students) == 0:
                     continue
                 yield Subject(name, periods_per_week, teacher_name, students)
             # If there are both sl and hl students in the subject
             else:
                 sl_students = [cell.value.strip() for cell in column[4:hl_marker_index]]
-                hl_students = [cell.value.strip() for cell 
+                hl_students = [cell.value.strip() for cell
                                in column[hl_marker_index + 1:ending_marker_index]]
                 if len(sl_students) == len(hl_students) == 0:
                     continue
                 # common periods
-                yield Subject(name + ' SL+HL', periods_per_week, teacher_name, 
-                        sl_students + hl_students)
+                yield Subject(name + ' SL+HL', periods_per_week, teacher_name,
+                              sl_students + hl_students)
                 # extra hl periods
-                yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name, 
-                        hl_students)
+                yield Subject(name + ' HL', extra_hl_periods_per_week, teacher_name,
+                              hl_students)
 
     def get_students(self, include_teachers: bool = True) -> Dict[str, List['Subject']]:
         """
@@ -152,16 +153,15 @@ class Datastore:
         students = defaultdict(list)  # type: defaultdict[str, List[Subject]]
         for subject in subjects:
             for student_name in student_names:
-                if (student_name in subject.student_names or 
-                        student_name == subject.teacher_name):
+                if student_name in subject.student_names or student_name == subject.teacher_name:
                     students[student_name].append(subject)
 
         return students
 
 
 class Subject:
-    def __init__(self, name: str, periods_per_week: int, teacher_name: str, 
-            student_names: List[str]) -> None:
+    def __init__(self, name: str, periods_per_week: int, teacher_name: str,
+                 student_names: List[str]) -> None:
         self.name = name
         self.periods_per_week = periods_per_week
         self.period_names = ['{}-p{}'.format(name, i)
@@ -186,6 +186,7 @@ def main():
         print([s.teacher_name] + list(s.student_names))
 
     print(datastore.get_students())
+
 
 if __name__ == '__main__':
     main()

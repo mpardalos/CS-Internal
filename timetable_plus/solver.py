@@ -9,8 +9,8 @@ from timetable_plus import models, views
 from timetable_plus.models import Subject, LoadingError
 
 
-def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->\
-    Iterator[Dict[Subject, List[int]]]:
+def possible_timetables(students: List[List[Subject]], periods_per_week: int) -> \
+        Iterator[Dict[Subject, List[int]]]:
     """
     Yield possible timetables
     
@@ -47,7 +47,7 @@ def possible_timetables(students: List[List[Subject]], periods_per_week: int) ->
             period_var
             for period_name, period_var in period_variables.items()
             if period_name in student_period_names
-            ]
+        ]
 
         # All of the student's periods must be scheduled at different times
         solver.AddConstraint(solver.AllDifferent(student_period_variables))
